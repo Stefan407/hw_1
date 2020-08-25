@@ -17,6 +17,19 @@
    isAllTrue([100, 2, 3, 4, 5], n => n < 10) // вернет false
  */
 function isAllTrue(array, fn) {
+    if (array.length === 0 || !Array.isArray(array)) {
+        throw new Error("empty array");
+    }
+    if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+    }
+    let isNotFalse = true;
+    for (let index of array) {
+        if (!fn(index)) {
+            isNotFalse = false;
+        }
+    }
+    return isNotFalse;
 }
 
 /*
@@ -36,7 +49,21 @@ function isAllTrue(array, fn) {
    isSomeTrue([1, 2, 3, 4, 5], n => n > 20) // вернет false
  */
 function isSomeTrue(array, fn) {
+    if (array.length === 0 || !Array.isArray(array)) {
+        throw new Error("empty array");
+    }
+    if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+    }
+    for (let index of array) {
+        if (fn(index)) {
+            return true;
+        }
+    }
+    return false;
 }
+
+
 
 /*
  Задание 3:
@@ -49,7 +76,19 @@ function isSomeTrue(array, fn) {
  3.3: Необходимо выбрасывать исключение в случаях:
    - fn не является функцией (с текстом "fn is not a function")
  */
-function returnBadArguments(fn) {
+function returnBadArguments(fn, ...rest) {
+    if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+    }
+    let exceptions = [];
+    for (let index of rest) {
+        try {
+            fn.call(this, index)
+        } catch (e) {
+            exceptions.push(index);
+        }
+    }
+    return exceptions;
 }
 
 /*
@@ -69,7 +108,58 @@ function returnBadArguments(fn) {
    - number не является числом (с текстом "number is not a number")
    - какой-либо из аргументов div является нулем (с текстом "division by 0")
  */
-function calculator() {
+function calculator(defaultNumber = 0) {
+    let isNumber = (x) => {
+        if (typeof x !== "number") {
+            throw new Error("number is not a number");
+        }
+    }
+    isNumber(defaultNumber);
+    let number = defaultNumber;
+
+    let isNotZero = (x) => {
+        if (x === 0) {
+            throw new Error("division by 0");
+        }
+    }
+
+
+    let sum = (...rest) => {
+        for (let ind of rest) {
+            isNumber(ind);
+            number += ind;
+        }
+        return number;
+    };
+    let dif = (...rest) => {
+        for (let ind of rest) {
+            isNumber(ind);
+            number -= ind;
+        }
+        return number;
+    };
+    let div = (...rest) => {
+        for (let ind of rest) {
+            isNumber(ind);
+            isNotZero(ind);
+            number /= ind
+        }
+        return number;
+    };
+    let mul = (...rest) => {
+        for (let ind of rest) {
+            isNumber(ind);
+            number *= ind
+        }
+        return number;
+    };
+    return {
+        number,
+        sum,
+        dif,
+        div,
+        mul
+    }
 }
 
 /* При решении задач, пострайтесь использовать отладчик */
