@@ -9,8 +9,10 @@
    delayPromise(3) // вернет promise, который будет разрешен через 3 секунды
  */
 function delayPromise(seconds) {
-  return new Promise((resolve) => {
-    setTimeout(() => { resolve }, seconds)
+  return new Promise((resolved) => {
+    setTimeout(() => {
+      resolved();
+    }, seconds * 1000)
   })
 }
 
@@ -43,8 +45,9 @@ function loadAndSortTowns() {
     xhr.onload = function () {
       if (xhr.status == 200) {
         // если всё прошло гладко, выводим результат
-        let newArray = xhr.response.sort();
-        resolve(newArray);
+
+        let dataResponse = JSON.parse(xhr.response);
+        resolve(dataResponse.sort((a, b) => a.name.localeCompare(b.name)));
       }
     };
 
