@@ -9,6 +9,9 @@
    delayPromise(3) // вернет promise, который будет разрешен через 3 секунды
  */
 function delayPromise(seconds) {
+  return new Promise((resolve) => {
+    setTimeout(() => { resolve }, seconds)
+  })
 }
 
 /*
@@ -25,9 +28,30 @@ function delayPromise(seconds) {
    loadAndSortTowns().then(towns => console.log(towns)) // должна вывести в консоль отсортированный массив городов
  */
 function loadAndSortTowns() {
+  return new Promise((resolve) => {
+
+    // 1. Создаём новый XMLHttpRequest-объект
+    let xhr = new XMLHttpRequest();
+
+    // 2. Настраиваем его: GET-запрос
+    xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json');
+
+    // 3. Отсылаем запрос
+    xhr.send();
+
+    // 4. Этот код сработает после того, как мы получим ответ сервера
+    xhr.onload = function () {
+      if (xhr.status == 200) {
+        // если всё прошло гладко, выводим результат
+        let newArray = xhr.response.sort();
+        resolve(newArray);
+      }
+    };
+
+  })
 }
 
 export {
-    delayPromise,
-    loadAndSortTowns
+  delayPromise,
+  loadAndSortTowns
 };
