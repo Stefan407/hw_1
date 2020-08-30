@@ -37,6 +37,28 @@ const homeworkContainer = document.querySelector('#homework-container');
  https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json
  */
 function loadTowns() {
+  return new Promise((resolve) => {
+
+    // 1. Создаём новый XMLHttpRequest-объект
+    let xhr = new XMLHttpRequest();
+
+    // 2. Настраиваем его: GET-запрос
+    xhr.open('GET', 'https://raw.githubusercontent.com/smelukov/citiesTest/master/cities.json');
+
+    // 3. Отсылаем запрос
+    xhr.send();
+
+    // 4. Этот код сработает после того, как мы получим ответ сервера
+    xhr.onload = function () {
+      if (xhr.status == 200) {
+        // если всё прошло гладко, выводим результат
+
+        let dataResponse = JSON.parse(xhr.response);
+        resolve(dataResponse.sort((a, b) => a.name.localeCompare(b.name)));
+      }
+    };
+
+  })
 }
 
 /*
@@ -51,10 +73,13 @@ function loadTowns() {
    isMatching('Moscow', 'Moscov') // false
  */
 function isMatching(full, chunk) {
+  return full.toLowerCase().includes(chunk.toLowerCase());
 }
 
 /* Блок с надписью "Загрузка" */
 const loadingBlock = homeworkContainer.querySelector('#loading-block');
+/* Блок ошибки */
+const loadingFailedBlock = homeworkContainer.querySelector('#loading-failed');
 /* Блок с текстовым полем и результатом поиска */
 const filterBlock = homeworkContainer.querySelector('#filter-block');
 /* Текстовое поле для поиска по городам */
@@ -62,11 +87,46 @@ const filterInput = homeworkContainer.querySelector('#filter-input');
 /* Блок с результатами поиска */
 const filterResult = homeworkContainer.querySelector('#filter-result');
 
-filterInput.addEventListener('keyup', function() {
-    // это обработчик нажатия кливиш в текстовом поле
+filterInput.addEventListener('keyup', function () {
+  updateFilter(this.value)
 });
+retryButton.addEventListener('click', function () {
+  tryToLoad();
+});
+loadingFailedBlock.style.display = "none";
+filterBlock.style.display = "none";
+
+async function tryToLoad() {
+  try {
+    towns = await loadTowns();
+    loadingBlock.classList.add('hidden');
+    loadingFailedBlock.classList.add('hidden');
+    filterBlock.classList.remove('hidden');
+  } catch (e) {
+    loadingBlock.classList.add('hidden');
+    loadingFailedBlock.classList.remove('hidden');
+  }
+}
+
+function updateFilter(filterValue) {
+  filterResult.innerHTML = '';
+
+  const fragment = document.createDocumentFragment();
+
+  for (const town of towns) {
+    if (filterValue && isMatching(town.name, filterValue)) {
+      const townDiv = document.createElement('div');
+      townDiv.textContent = town.name;
+      fragment.append(townDiv);
+    }
+  }
+
+  filterResult.append(fragment);
+}
+
+tryToLoad();
 
 export {
-    loadTowns,
-    isMatching
+  loadTowns,
+  isMatching
 };
